@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//criar uma migration: yarn prisma migrate dev
+//tabela usuario
+model User {
+  id String @id @default(uuid()) // chave primaria com auto incrmeto
+  name String
+  email String
+  password String
+  created_at DateTime? @default(now()) // Opicional e por padrão pega a data atual
+  updated_at DateTime? @default(now())// Opcional e por padrão usa a data de criação do usuario no banco
+
+  @@map("users")
+}
+
+model Category{
+  id String @id @default(uuid()) // Auto incremento ira gerar sozinho a primary key
+  name String
+  created_at DateTime? @default(now()) // Opicional e por padrão pega a data atual
+  updated_at DateTime? @default(now())// Opcional e por padrão usa a data de criação do usuario no banco
+
+  @@map("categories")
+  products Product[] // uma categoria pode ter varios produtos 
+}
+
+model Product{
+  id String @id @default(uuid())
+  name String
+  price String
+  description String
+  banner String
+  created_at DateTime? @default(now()) // Opicional e por padrão pega a data atual
+  updated_at DateTime? @default(now())// Opcional e por padrão usa a data de criação do usuario no banco
+
+  //criado categoria que pode ter varios produtos o id serve pra referenciar os tipos de categoria que pode ter varios produtos atrelados
+  category Category @relation(fields: [category_id], references: [id])
+
+  @@map("products")
+  category_id String
+  Items Item[]
+}
+
+model Order{
+    id String @id @default(uuid())
+    table Int
+    status Boolean @default(false) // pedido sempre vai começar como false até que o garçom finalize o pedido
+    draft Boolean @default(true) // Quando criar um pedido sempre irá começar como rascunho atpe finalizar o pedido 
+    name String? // Dado opcional
+    created_at DateTime? @default(now()) // Opicional e por padrão pega a data atual
+    updated_at DateTime? @default(now())// Opcional e por padrão usa a data de criação do usuario no banco
+
+  @@map("orders")
+  Items Item[]
+
+}
+
+model Item{
+    id String @id @default(uuid())
+    amount Int
+    created_at DateTime? @default(now()) // Opicional e por padrão pega a data atual
+    updated_at DateTime? @default(now())// Opcional e por padrão usa a data de criação do usuario no banco
+
+    order Order @relation(fields:[order_id], references: [id])
+    product Product @relation(fields: [product_id], references:[id])
+    
+    @@map("items")
+    order_id String
+    product_id String
+
+}
